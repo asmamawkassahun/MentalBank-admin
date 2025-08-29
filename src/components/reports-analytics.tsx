@@ -22,7 +22,7 @@ interface FormattedData {
   users: number
 }
 
-const baseUrl = process.env.NEXT_PUBLIC_API_URL
+const baseUrl = "http://localhost:3000"
 
 interface ReportsData {
   metrics: {
@@ -73,7 +73,7 @@ export function ReportsAnalytics() {
 
 
   // Fetch age distribution data
-  const { data: ageDistributionData, isLoading: ageDistributionLoadingChart } = useQuery({
+  const { data: ageDistributionData, isLoading: ageDistributionLoadingChart, error: ageDistributionError } = useQuery({
     queryKey: ["ageDistribution"],
     queryFn: async () => {
       const res = await axios.get(`${baseUrl}/admin/dashboard/age-distribution`, {
@@ -84,13 +84,16 @@ export function ReportsAnalytics() {
   })
 
   console.log("ageDistribution: ", ageDistributionData)
+  if (ageDistributionError) {
+    console.error("Age distribution error:", ageDistributionError)
+  }
 
 
-  const formattedAge = ageDistributionData?.labels?.map((label, idx) => ({
+  const formattedAge = ageDistributionData?.labels?.map((label: string, idx: number) => ({
     ageGroup: label,
-    percentage: ageDistributionData.percents[idx],
-    counts: ageDistributionData.counts[idx],
-  }))
+    percentage: ageDistributionData.percents[idx] || 0,
+    counts: ageDistributionData.counts[idx] || 0,
+  })) || []
 
   console.log("Formatted Age Distribution Data: ", formattedAge)
 
@@ -112,7 +115,7 @@ export function ReportsAnalytics() {
   }
 
 
-  if (totalUserLoadingChart) {
+  if (totalUserLoadingChart || ageDistributionLoadingChart) {
     return <div className="flex-1 flex items-center justify-center">Loading...</div>
   }
 

@@ -7,7 +7,7 @@ import { useState, useEffect } from "react"
 
 
 interface AgeDistributionData {
-    data: Array<{ ageGroup: string; percentage: number; counts: number }>
+    data: Array<{ ageGroup: string; percentage: number; counts: number }> | undefined
     loading?: boolean
 }
 
@@ -15,8 +15,7 @@ const COLORS = ["#6366f1", "#a855f7", "#3b82f6", "#ef4444", "#6b7280"]
 
 export function UserAgeDistribution({data, loading}:  AgeDistributionData) {
  
-
- const ageData = data
+  const ageData = data || []
 
   const getAgeColor = (ageGroup: string) => {
     switch (ageGroup) {
@@ -61,7 +60,13 @@ export function UserAgeDistribution({data, loading}:  AgeDistributionData) {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value) => `${value}%`} />
+                <Tooltip 
+                  formatter={(value: any, name: any, props: any) => [
+                    `${value}% (${props.payload.counts} users)`,
+                    props.payload.ageGroup
+                  ]}
+                  labelStyle={{ fontWeight: 'bold' }}
+                />
               </PieChart>
             </ResponsiveContainer>
           ) : (
@@ -79,16 +84,18 @@ export function UserAgeDistribution({data, loading}:  AgeDistributionData) {
                   style={{ backgroundColor: getAgeColor(item.ageGroup) }}
                 />
                 <span className="text-xs text-foreground/60">{item.ageGroup}</span>
+                <span className="text-xs text-foreground/40">({item.counts})</span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 mt-4 pt-4 ">
-          {ageData?.slice(0, 3).map((ageGroup) => (
+        <div className="grid grid-cols-5 gap-2 mt-4 pt-4">
+          {ageData?.map((ageGroup) => (
             <div key={ageGroup.ageGroup} className="text-center">
               <div className="text-lg font-semibold">{ageGroup.percentage}%</div>
               <div className="text-xs text-foreground/60">{ageGroup.ageGroup}</div>
+              <div className="text-xs text-foreground/40">{ageGroup.counts} users</div>
             </div>
           ))}
         </div>

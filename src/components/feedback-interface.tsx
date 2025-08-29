@@ -12,15 +12,16 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Calendar, Filter, Download, Settings, Plus, DownloadIcon, Trash2, ChevronDown, X, CircleQuestionMark } from "lucide-react"
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts"
 import axios from "axios"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 
-const baseUrl = process.env.NEXT_PUBLIC_API_URL
+const baseUrl = "http://localhost:3000"
 
 interface KnowledgeBaseArticle {
   id: string
-  title: string
-  views: number
-  lastUpdated: string
+  question: string
+  answer: string
+  likes: number
+  createdAt: string
 }
 
 interface UserFeedback {
@@ -36,7 +37,6 @@ interface UserFeedback {
 }
 
 export function FeedbackInterface() {
-  const [knowledgeBase, setKnowledgeBase] = useState<KnowledgeBaseArticle[]>([])
   const [userFeedbacks, setUserFeedbacks] = useState<UserFeedback[]>([])
 
   const [currentPage, setCurrentPage] = useState(1)
@@ -44,10 +44,10 @@ export function FeedbackInterface() {
   const [timeframeFilter, setTimeframeFilter] = useState("Recent")
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [formData, setFormData] = useState({
-    title: "",
-    body: "",
+    question: "",
+    answer: "",
   })
-  const [formErrors, setFormErrors] = useState<{ title?: string; body?: string }>({})
+  const [formErrors, setFormErrors] = useState<{ question?: string; answer?: string }>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [articleToDelete, setArticleToDelete] = useState<KnowledgeBaseArticle | null>(null)
@@ -56,6 +56,7 @@ export function FeedbackInterface() {
 
 
   const token = localStorage.getItem("token")
+  const queryClient = useQueryClient()
 
   // const timeframeOptions = [
   //   { value: "Recent", label: "Recent" },
@@ -64,18 +65,6 @@ export function FeedbackInterface() {
   // ]
 
   useEffect(() => {
-    fetch("/api/feedback/knowledge-base")
-      .then((res) => res.json())
-      .then((data) => setKnowledgeBase(data))
-      .catch(() => {
-        setKnowledgeBase([
-          { id: "1", title: "How to process returns", views: 1245, lastUpdated: "2 days ago" },
-          { id: "2", title: "Payment processing troubleshooting", views: 987, lastUpdated: "1 week ago" },
-          { id: "3", title: "Account security best practices", views: 856, lastUpdated: "3 days ago" },
-          { id: "4", title: "Shipping policy and timeframes", views: 742, lastUpdated: "5 days ago" },
-        ])
-      })
-
     // fetchUserFeedbacks()
   }, [currentPage, timeframeFilter])
 
@@ -148,7 +137,7 @@ export function FeedbackInterface() {
 
   console.log("Feedback Analysis Data: ", feedbackAnalysisData)
 
-  const pieData = feedbackAnalysisData?.labels?.map((label: any, index: any) => ({
+  const pieData = feedbackAnalysisData?.labels?.map((label: string, index: number) => ({
     name: label,
     value: feedbackAnalysisData.percents[index], // keep the % sign
     color: colors[label],
@@ -156,18 +145,18 @@ export function FeedbackInterface() {
   console.log("Pie Data: ", pieData)
 
   const validateForm = () => {
-    const errors: { title?: string; body?: string } = {}
+    const errors: { question?: string; answer?: string } = {}
 
-    if (!formData.title.trim()) {
-      errors.title = "Question title is required"
-    } else if (formData.title.trim().length < 5) {
-      errors.title = "Question title must be at least 5 characters"
+    if (!formData.question.trim()) {
+      errors.question = "Question is required"
+    } else if (formData.question.trim().length < 5) {
+      errors.question = "Question must be at least 5 characters"
     }
 
-    if (!formData.body.trim()) {
-      errors.body = "Question body is required"
-    } else if (formData.body.trim().length < 10) {
-      errors.body = "Question body must be at least 10 characters"
+    if (!formData.answer.trim()) {
+      errors.answer = "Answer is required"
+    } else if (formData.answer.trim().length < 10) {
+      errors.answer = "Answer must be at least 10 characters"
     }
 
     setFormErrors(errors)
@@ -180,38 +169,31 @@ export function FeedbackInterface() {
     setIsSubmitting(true)
 
     try {
-      const response = await fetch("/api/feedback/questions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...formData,
-          action,
-          timestamp: new Date().toISOString(),
-        }),
+      const token = localStorage.getItem("token")
+      const response = await axios.post(`${baseUrl}/admin/articles`, {
+        question: formData.question,
+        answer: formData.answer,
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
       })
 
-      if (response.ok) {
-        setFormData({ title: "", body: "" })
+      if (response.status === 201 || response.status === 200) {
+        setFormData({ question: "", answer: "" })
         setFormErrors({})
         setIsModalOpen(false)
-
-        fetch("/api/feedback/knowledge-base")
-          .then((res) => res.json())
-          .then((data) => setKnowledgeBase(data))
-          .catch(() => { })
+        // Invalidate and refetch articles to update the list
+        queryClient.invalidateQueries({ queryKey: ["Articles"] })
       } else {
-        throw new Error("Failed to submit question")
+        throw new Error("Failed to create article")
       }
     } catch (error) {
-      console.error("Error submitting question:", error)
+      console.error("Error creating article:", error)
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const handleInputChange = (field: "title" | "body", value: string) => {
+  const handleInputChange = (field: "question" | "answer", value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
     if (formErrors[field]) {
       setFormErrors((prev) => ({ ...prev, [field]: undefined }))
@@ -229,14 +211,16 @@ export function FeedbackInterface() {
     setIsDeleting(true)
 
     try {
-      const response = await fetch(`/api/feedback/knowledge-base/${articleToDelete.id}`, {
-        method: "DELETE",
+      const token = localStorage.getItem("token")
+      const response = await axios.delete(`${baseUrl}/admin/articles/${articleToDelete.id}`, {
+        headers: { Authorization: `Bearer ${token}` }
       })
 
-      if (response.ok) {
-        setKnowledgeBase((prev) => prev.filter((article) => article.id !== articleToDelete.id))
+      if (response.status === 200 || response.status === 204) {
         setIsDeleteModalOpen(false)
         setArticleToDelete(null)
+        // Invalidate and refetch articles to update the list
+        queryClient.invalidateQueries({ queryKey: ["Articles"] })
       } else {
         throw new Error("Failed to delete article")
       }
@@ -308,23 +292,25 @@ export function FeedbackInterface() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 font-medium text-foreground/60">Title</th>
-                  <th className="text-left py-3 px-4 font-medium text-foreground/60">Views</th>
-                  <th className="text-left py-3 px-4 font-medium text-foreground/60">Last Updated</th>
+                  <th className="text-left py-3 px-4 font-medium text-foreground/60">Question</th>
+                  <th className="text-left py-3 px-4 font-medium text-foreground/60">Answer</th>
+                  <th className="text-left py-3 px-4 font-medium text-foreground/60">Likes</th>
+                  <th className="text-left py-3 px-4 font-medium text-foreground/60">Created</th>
                   <th className="text-left py-3 px-4 font-medium text-foreground/60">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {knowledgeBase.map((article) => (
+                {Articles?.map((article: KnowledgeBaseArticle) => (
                   <tr key={article.id} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="py-4 px-4">
                       <div className="flex items-center gap-2">
                         <CircleQuestionMark className="text-[#3B82F6] w-5 h-5 " />
-                        <span className="">{article.title}</span>
+                        <span className="">{article.question}</span>
                       </div>
                     </td>
-                    <td className="py-4 px-4 ">{article.views.toLocaleString()}</td>
-                    <td className="py-4 px-4 ">{article.lastUpdated}</td>
+                    <td className="py-4 px-4 max-w-xs truncate">{article.answer}</td>
+                    <td className="py-4 px-4 ">{article.likes}</td>
+                    <td className="py-4 px-4 ">{new Date(article.createdAt).toLocaleDateString()}</td>
                     <td className="py-4 px-4">
                       <div className="flex items-center gap-2">
                         <Button variant="ghost" size="sm">
@@ -444,7 +430,7 @@ export function FeedbackInterface() {
                     paddingAngle={0}
                     dataKey="value"
                   >
-                    {pieData?.map((entry, index) => (
+                    {pieData?.map((entry: { color: string }, index: number) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
@@ -458,21 +444,21 @@ export function FeedbackInterface() {
                   <div className="w-3 h-3 bg-[#22C55E] rounded-full"></div>
                   <span className="text-sm font-medium ">Positive</span>
                 </div>
-                <span className="text-sm font-semibold ">{pieData?.find(item => item.name === "Positive")?.value}%</span>
+                <span className="text-sm font-semibold ">{pieData?.find((item: { name: string; value: number }) => item.name === "Positive")?.value}%</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 bg-[#94A3B8] rounded-full"></div>
                   <span className="text-sm font-medium ">Neutral</span>
                 </div>
-                <span className="text-sm font-semibold ">{pieData?.find(item => item.name === "Neutral")?.value}%</span>
+                <span className="text-sm font-semibold ">{pieData?.find((item: { name: string; value: number }) => item.name === "Neutral")?.value}%</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 bg-[#EF4444] rounded-full"></div>
                   <span className="text-sm font-medium ">Negative</span>
                 </div>
-                <span className="text-sm font-semibold ">{pieData?.find(item => item.name === "Negative")?.value}%</span>
+                <span className="text-sm font-semibold ">{pieData?.find((item: { name: string; value: number }) => item.name === "Negative")?.value}%</span>
               </div>
             </div>
           </div>
@@ -488,43 +474,37 @@ export function FeedbackInterface() {
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="title">Question Title</Label>
+              <Label htmlFor="question">Question</Label>
               <Input
-                id="title"
-                placeholder="Enter question title"
-                value={formData.title}
-                onChange={(e) => handleInputChange("title", e.target.value)}
-                className={formErrors.title ? "border-red-500" : ""}
+                id="question"
+                placeholder="Enter your question"
+                value={formData.question}
+                onChange={(e) => handleInputChange("question", e.target.value)}
+                className={formErrors.question ? "border-red-500" : ""}
               />
-              {formErrors.title && <p className="text-sm text-red-500">{formErrors.title}</p>}
+              {formErrors.question && <p className="text-sm text-red-500">{formErrors.question}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="body">Question Body</Label>
+              <Label htmlFor="answer">Answer</Label>
               <Textarea
-                id="body"
-                placeholder="Type your message here..."
-                value={formData.body}
-                onChange={(e) => handleInputChange("body", e.target.value)}
-                className={`min-h-[120px] ${formErrors.body ? "border-red-500" : ""}`}
+                id="answer"
+                placeholder="Type your answer here..."
+                value={formData.answer}
+                onChange={(e) => handleInputChange("answer", e.target.value)}
+                className={`min-h-[120px] ${formErrors.answer ? "border-red-500" : ""}`}
               />
-              {formErrors.body && <p className="text-sm text-red-500">{formErrors.body}</p>}
+              {formErrors.answer && <p className="text-sm text-red-500">{formErrors.answer}</p>}
             </div>
           </div>
 
-          <div className="flex justify-end gap-3">
-            <Button variant="outline" onClick={() => handleSubmit("draft")} disabled={isSubmitting}>
-              Save as Draft
-            </Button>
-            <Button variant="outline" onClick={() => handleSubmit("send")} disabled={isSubmitting}>
-              Send Now
-            </Button>
+          <div className="flex justify-end">
             <Button
-              onClick={() => handleSubmit("schedule")}
+              onClick={() => handleSubmit("send")}
               disabled={isSubmitting}
               className="bg-black text-white hover:bg-gray-800"
             >
-              {isSubmitting ? "Submitting..." : "Schedule"}
+              {isSubmitting ? "Creating..." : "Add Article"}
             </Button>
           </div>
         </DialogContent>

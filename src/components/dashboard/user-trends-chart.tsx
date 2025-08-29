@@ -41,7 +41,7 @@ interface ChartData {
     periodLabel: string
   }
 }
-const baseUrl = process.env.NEXT_PUBLIC_API_URL
+const baseUrl = "http://localhost:3000"
 
 
 export function UserTrendsChart() {

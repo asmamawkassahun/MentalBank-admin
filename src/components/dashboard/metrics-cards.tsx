@@ -15,7 +15,7 @@ interface MetricData {
   newUsers: { count: number; change: number; changeFromLastMonth: number }
   deletedAccounts: { count: number; change: number; changeFromLastMonth: number }
 }
-const baseUrl = "http://161.97.174.190:3000"
+const baseUrl = "http://localhost:3000"
 
 
 export function MetricsCards() {

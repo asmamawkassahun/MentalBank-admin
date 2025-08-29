@@ -27,7 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string): Promise<boolean> => {
     setLoading(true)
     try {
-      const baseUrl = "http://161.97.174.190:3000"
+      const baseUrl = "http://localhost:3000"
       const response = await fetch(`${baseUrl}/admin/login`, {
         method: "POST",
         headers: {
