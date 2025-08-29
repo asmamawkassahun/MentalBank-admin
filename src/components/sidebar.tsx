@@ -102,7 +102,7 @@ export function AppSidebar({ currentPage, onPageChange }: AppSidebarProps) {
               {navigationItems.map((item) => (
                 <SidebarMenuItem key={item.label}>
                   <SidebarMenuButton
-                  className="cursor-pointer"
+                    className="cursor-pointer"
                     onClick={() => {
                       if (item.key === "dashboard") onPageChange("dashboard")
                       if (item.key === "reports") onPageChange("reports")
@@ -133,7 +133,7 @@ export function AppSidebar({ currentPage, onPageChange }: AppSidebarProps) {
               {supportItems.map((item) => (
                 <SidebarMenuItem key={item.label}>
                   <SidebarMenuButton
-                  className="cursor-pointer"
+                    className="cursor-pointer"
                     onClick={() => {
                       if (item.key === "feedback") onPageChange("feedback")
                       if (item.key === "settings") onPageChange("settings")
@@ -162,10 +162,10 @@ export function AppSidebar({ currentPage, onPageChange }: AppSidebarProps) {
               {isLoading
                 ? "..."
                 : adminData.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")
-                    .toUpperCase()}
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
