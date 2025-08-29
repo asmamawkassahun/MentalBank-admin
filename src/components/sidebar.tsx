@@ -84,7 +84,6 @@ export function AppSidebar({ currentPage, onPageChange }: AppSidebarProps) {
               />
             </svg>
 
-            {/* <span className="text-white font-semibold text-sm">M</span> */}
           </div>
           <div className="leading-tight">
             <h1 className="font-extrabold text-[1.25rem]  group-data-[collapsible=icon]:hidden">

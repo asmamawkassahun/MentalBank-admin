@@ -253,9 +253,6 @@ export function FeedbackInterface() {
     setArticleToDelete(null)
   }
 
-
-
-
   const feedbacksPerPage = 4
   const totalPages = Math.ceil(allFeedbacks / feedbacksPerPage)
   const startIndex = (currentPage - 1) * feedbacksPerPage + 1

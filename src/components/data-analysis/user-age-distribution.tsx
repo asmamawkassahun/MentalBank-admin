@@ -35,8 +35,6 @@ export function UserAgeDistribution({data, loading}:  AgeDistributionData) {
     }
   }
 
-
-
   return (
     <Card className=" shadow-[0px_1px_3px_0px_#0000000D]">
       <CardHeader>
