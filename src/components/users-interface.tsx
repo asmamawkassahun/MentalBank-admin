@@ -239,55 +239,55 @@ export function UsersInterface() {
                         </Table>
                     </div>
                     {/* Pagination */}
-                <div className="flex items-center justify-between border-t px-4 py-6">
-                    <div className="text-sm  text-[#6B7280]">
-                        Showing <span className=" font-semibold">{startIndex}</span> to <span className=" font-semibold">{endIndex}</span> of <span className=" font-semibold">{safeData.total}</span> users
-                    </div>
-                    {showPagination && (
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={handlePreviousPage}
-                                disabled={currentPage === 1}
-                                className="flex items-center gap-1 bg-transparent"
-                            >
-                                <ChevronLeft className="h-4 w-4" />
-                            </Button>
-
-                            {Array.from({ length: Math.min(safeData.totalPages, 3) }, (_, i) => {
-                                const pageNum = i + 1
-                                return (
-                                    <Button
-                                        key={pageNum}
-                                        variant={currentPage === pageNum ? "outline" : "outline"}
-                                        size="sm"
-                                        className={` ${currentPage === pageNum ? "bg-[#F3F4F6]" : ""}`}
-                                        onClick={() => handlePageClick(pageNum)}
-                                    >
-                                        {pageNum}
-                                    </Button>
-                                )
-                            })}
-
-                            {safeData.totalPages > 3 && <span className="foreground/60 px-2">...</span>}
-
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={handleNextPage}
-                                disabled={currentPage === safeData.totalPages}
-                                className="flex items-center gap-1 bg-transparent"
-                            >
-                                <ChevronRight className="h-4 w-4" />
-                            </Button>
+                    <div className="flex items-center justify-between border-t px-4 py-6">
+                        <div className="text-sm  text-[#6B7280]">
+                            Showing <span className=" font-semibold">{startIndex}</span> to <span className=" font-semibold">{endIndex}</span> of <span className=" font-semibold">{safeData.total}</span> users
                         </div>
-                    )}
-                </div>
+                        {showPagination && (
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handlePreviousPage}
+                                    disabled={currentPage === 1}
+                                    className="flex items-center gap-1 bg-transparent"
+                                >
+                                    <ChevronLeft className="h-4 w-4" />
+                                </Button>
+
+                                {Array.from({ length: Math.min(safeData.totalPages, 3) }, (_, i) => {
+                                    const pageNum = i + 1
+                                    return (
+                                        <Button
+                                            key={pageNum}
+                                            variant={currentPage === pageNum ? "outline" : "outline"}
+                                            size="sm"
+                                            className={` ${currentPage === pageNum ? "bg-[#F3F4F6]" : ""}`}
+                                            onClick={() => handlePageClick(pageNum)}
+                                        >
+                                            {pageNum}
+                                        </Button>
+                                    )
+                                })}
+
+                                {safeData.totalPages > 3 && <span className="foreground/60 px-2">...</span>}
+
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handleNextPage}
+                                    disabled={currentPage === safeData.totalPages}
+                                    className="flex items-center gap-1 bg-transparent"
+                                >
+                                    <ChevronRight className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
 
-                
+
             </div>
         </div>
     )
