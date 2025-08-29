@@ -1,13 +1,21 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import axios from "axios"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Search, Laptop, Smartphone, Monitor } from "lucide-react"
+import { Search, Laptop, Smartphone, Monitor, Loader2 } from "lucide-react"
 import { Separator } from "./ui/separator"
+
+interface Profile {
+  id: string
+  firstName: string
+  lastName: string
+  email: string
+}
 
 interface LoginActivity {
   device: string
@@ -16,22 +24,152 @@ interface LoginActivity {
 }
 
 export function SettingsInterface() {
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isUpdating, setIsUpdating] = useState(false)
+  const [isChangingPassword, setIsChangingPassword] = useState(false)
+  const [updateMessage, setUpdateMessage] = useState("")
+  const [passwordMessage, setPasswordMessage] = useState("")
+  
   const [formData, setFormData] = useState({
-    firstName: "John",
-    lastName: "Smith",
-    email: "john.smith@example.com",
+    firstName: "",
+    lastName: "",
+    email: "",
+  })
+
+  const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
-    confirmPassword: "",
+    confirmNewPassword: "",
   })
 
   const [searchQuery, setSearchQuery] = useState("")
+
+  // Get token from localStorage or context
+  const getAuthToken = () => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('token') || sessionStorage.getItem('token')
+    }
+    return null
+  }
+
+  // Create axios instance with base configuration
+  const api = axios.create({
+    baseURL: 'http://localhost:3000',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+
+  // Add request interceptor to include auth token
+  api.interceptors.request.use((config) => {
+    const token = getAuthToken()
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  })
 
   const loginActivity: LoginActivity[] = [
     { device: "MacBook Pro", location: "San Francisco, CA", icon: "laptop" },
     { device: "iPhone 13", location: "San Francisco, CA", icon: "smartphone" },
     { device: "Windows PC", location: "New York, NY", icon: "monitor" },
   ]
+
+  // Fetch profile data on component mount
+  useEffect(() => {
+    fetchProfile()
+  }, [])
+
+  const fetchProfile = async () => {
+    try {
+      setIsLoading(true)
+      const response = await api.get('/admin/profile')
+      setProfile(response.data)
+      setFormData({
+        firstName: response.data.firstName,
+        lastName: response.data.lastName,
+        email: response.data.email,
+      })
+    } catch (error) {
+      console.error('Error fetching profile:', error)
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        // Handle unauthorized access
+        console.error('Unauthorized access - please login again')
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const updateProfile = async () => {
+    try {
+      setIsUpdating(true)
+      setUpdateMessage("")
+      
+      const response = await api.put('/admin/profile', formData)
+
+      setProfile(response.data)
+      setUpdateMessage("Profile updated successfully!")
+      setTimeout(() => setUpdateMessage(""), 3000)
+    } catch (error) {
+      console.error('Error updating profile:', error)
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          setUpdateMessage("Unauthorized access - please login again")
+        } else if (error.response?.status === 400) {
+          setUpdateMessage("Invalid data provided. Please check your input.")
+        } else {
+          setUpdateMessage("Failed to update profile. Please try again.")
+        }
+      } else {
+        setUpdateMessage("An error occurred while updating profile.")
+      }
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
+  const changePassword = async () => {
+    if (passwordData.newPassword !== passwordData.confirmNewPassword) {
+      setPasswordMessage("New passwords do not match!")
+      return
+    }
+
+    try {
+      setIsChangingPassword(true)
+      setPasswordMessage("")
+      
+      const response = await api.put('/admin/profile/change-password', {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+        confirmNewPassword: passwordData.confirmNewPassword,
+      })
+
+      setPasswordMessage(response.data.message || "Password changed successfully!")
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmNewPassword: "",
+      })
+      setTimeout(() => setPasswordMessage(""), 3000)
+    } catch (error) {
+      console.error('Error changing password:', error)
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          setPasswordMessage("Unauthorized access - please login again")
+        } else if (error.response?.status === 400) {
+          setPasswordMessage("Invalid current password or password requirements not met.")
+        } else {
+          setPasswordMessage("Failed to change password. Please try again.")
+        }
+      } else {
+        setPasswordMessage("An error occurred while changing password.")
+      }
+    } finally {
+      setIsChangingPassword(false)
+    }
+  }
 
   const getDeviceIcon = (iconType: "laptop" | "smartphone" | "monitor") => {
     switch (iconType) {
@@ -48,21 +186,33 @@ export function SettingsInterface() {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
-  const handleSaveChanges = () => {
-    // Handle save logic here
-    console.log("Saving changes:", formData)
+  const handlePasswordChange = (field: string, value: string) => {
+    setPasswordData((prev) => ({ ...prev, [field]: value }))
   }
 
   const handleCancel = () => {
-    // Reset form or navigate away
+    if (profile) {
     setFormData({
-      firstName: "John",
-      lastName: "Smith",
-      email: "john.smith@example.com",
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        email: profile.email,
+      })
+    }
+    setPasswordData({
       currentPassword: "",
       newPassword: "",
-      confirmPassword: "",
+      confirmNewPassword: "",
     })
+    setUpdateMessage("")
+    setPasswordMessage("")
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
   }
 
   return (
@@ -94,12 +244,12 @@ export function SettingsInterface() {
           <CardContent>
             <div className="flex items-center space-x-4">
               <Avatar className="h-16 w-16">
-                <AvatarImage src="/professional-male-avatar.png" alt="John Smith" />
-                <AvatarFallback>JS</AvatarFallback>
+                <AvatarImage src="/admin-user-avatar.png" alt={`${profile?.firstName} ${profile?.lastName}`} />
+                <AvatarFallback>{profile?.firstName?.[0]}{profile?.lastName?.[0]}</AvatarFallback>
               </Avatar>
               <div className="space-y-1">
-                <h3 className="font-medium">John Smith</h3>
-                <p className="text-sm text-foreground/60">john.smith@example.com</p>
+                <h3 className="font-medium">{profile?.firstName} {profile?.lastName}</h3>
+                <p className="text-sm text-foreground/60">{profile?.email}</p>
                 <div className="flex space-x-2">
                   <Button variant="outline" size="sm">
                     Change Photo
@@ -150,18 +300,38 @@ export function SettingsInterface() {
                 className="max-w-md"
               />
             </div>
+            {updateMessage && (
+              <div className={`text-sm ${updateMessage.includes('successfully') ? 'text-green-600' : 'text-red-600'}`}>
+                {updateMessage}
+              </div>
+            )}
+            <div className="flex space-x-3">
+              <Button 
+                onClick={updateProfile} 
+                disabled={isUpdating}
+                className="max-w-md"
+              >
+                {isUpdating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  'Update Profile'
+                )}
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
         {/* Security Settings */}
         <Card className="space-y-6 shadow-none">
-          {/* Security Settings */}
+          {/* Change Password */}
           <div className="p-0 border-0 shadow-none">
             <CardHeader>
-              <CardTitle>Security Settings</CardTitle>
-              <CardDescription>Manage your password and account security preferences</CardDescription>
+              <CardTitle>Change Password</CardTitle>
+              <CardDescription>Update your password to keep your account secure</CardDescription>
             </CardHeader>
-
             <CardContent className="space-y-4 mt-6">
               <div className="space-y-2">
                 <Label htmlFor="currentPassword">Current Password</Label>
@@ -169,8 +339,8 @@ export function SettingsInterface() {
                   id="currentPassword"
                   type="password"
                   placeholder="••••••••••"
-                  value={formData.currentPassword}
-                  onChange={(e) => handleInputChange("currentPassword", e.target.value)}
+                  value={passwordData.currentPassword}
+                  onChange={(e) => handlePasswordChange("currentPassword", e.target.value)}
                   className="max-w-md"
                 />
               </div>
@@ -181,22 +351,43 @@ export function SettingsInterface() {
                     id="newPassword"
                     type="password"
                     placeholder="••••••••••"
-                    value={formData.newPassword}
-                    onChange={(e) => handleInputChange("newPassword", e.target.value)}
+                    value={passwordData.newPassword}
+                    onChange={(e) => handlePasswordChange("newPassword", e.target.value)}
                     className="max-w-md"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                  <Label htmlFor="confirmNewPassword">Confirm New Password</Label>
                   <Input
-                    id="confirmPassword"
+                    id="confirmNewPassword"
                     type="password"
                     placeholder="••••••••••"
-                    value={formData.confirmPassword}
-                    onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+                    value={passwordData.confirmNewPassword}
+                    onChange={(e) => handlePasswordChange("confirmNewPassword", e.target.value)}
                     className="max-w-md"
                   />
                 </div>
+              </div>
+              {passwordMessage && (
+                <div className={`text-sm ${passwordMessage.includes('successfully') ? 'text-green-600' : 'text-red-600'}`}>
+                  {passwordMessage}
+                </div>
+              )}
+              <div className="flex space-x-3">
+                <Button 
+                  onClick={changePassword} 
+                  disabled={isChangingPassword}
+                  className="max-w-md"
+                >
+                  {isChangingPassword ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Changing Password...
+                    </>
+                  ) : (
+                    'Change Password'
+                  )}
+                </Button>
               </div>
             </CardContent>
           </div>
@@ -238,13 +429,11 @@ export function SettingsInterface() {
           </div>
         </Card>
 
-
         {/* Action Buttons */}
         <div className="flex justify-end space-x-3 pt-4">
           <Button variant="outline" onClick={handleCancel}>
             Cancel
           </Button>
-          <Button onClick={handleSaveChanges}>Save Changes</Button>
         </div>
       </div>
     </div>
