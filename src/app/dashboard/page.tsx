@@ -23,7 +23,7 @@ export default function DashboardPage() {
       <SidebarWrapper currentPage={currentPage} onPageChange={setCurrentPage}>
         {currentPage === "dashboard" ? (
           <>
-            <DashboardHeader />
+            <DashboardHeader title="Admin Dashboard" />
             <div className="p-6 space-y-6">
               <MetricsCards />
               <UserTrendsChart />

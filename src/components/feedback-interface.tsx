@@ -264,81 +264,74 @@ export function FeedbackInterface() {
 
   return (
     <div className="flex-1 flex flex-col">
-      <div className="bg-background border-b border-gray-200 px-6 py-4">
+      <div className="bg-background  border-gray-200 px-6 pt-8 ">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold ">Feedbacks</h1>
+            <h1 className="text-[1.875rem] font-bold ">Feedbacks</h1>
             <p className="text-sm text-foreground/60 mt-1">Monitor user mental health trends and journal ac</p>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
-              <Calendar className="w-4 h-4 mr-2" />
-              Last 30 days
-              <ChevronDown className="w-4 h-4 ml-2" />
-            </Button>
-            <Button variant="outline" size="sm">
-              <Filter className="w-4 h-4 mr-2" />
-              Filters
-            </Button>
+              
             <Button variant="outline" size="sm">
               <Download className="w-4 h-4 mr-2" />
               Export
             </Button>
-            <Button variant="outline" size="sm">
-              <Settings className="w-4 h-4" />
-            </Button>
+            
           </div>
         </div>
       </div>
 
       <main className="flex-1 p-6 space-y-6">
         <div className="bg-background rounded-lg shadow-[0px_1px_2px_0px_#0000000D] border p-6">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-2">
             <div>
               <h2 className="text-lg font-semibold ">Popular Questions</h2>
               <p className="text-sm text-foreground/60">Frequently accessed help articles</p>
             </div>
-            <Button size="sm" onClick={() => setIsModalOpen(true)}>
+            <Button size="sm" variant="outline" className="-mb-2 bg-background text-foreground border shadow-none" onClick={() => setIsModalOpen(true)}>
               <Plus className="w-4 h-4 mr-2" />
               New Article
             </Button>
           </div>
 
           <div className="overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 font-medium text-foreground/60">Title</th>
-                  <th className="text-left py-3 px-4 font-medium text-foreground/60">Views</th>
-                  <th className="text-left py-3 px-4 font-medium text-foreground/60">Last Updated</th>
-                  <th className="text-left py-3 px-4 font-medium text-foreground/60">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {knowledgeBase.map((article) => (
-                  <tr key={article.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-4 px-4">
-                      <div className="flex items-center gap-2">
-                        <CircleQuestionMark className="text-[#3B82F6] w-5 h-5 " />
-                        <span className="">{article.title}</span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4 ">{article.views.toLocaleString()}</td>
-                    <td className="py-4 px-4 ">{article.lastUpdated}</td>
-                    <td className="py-4 px-4">
-                      <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm">
-                          <DownloadIcon className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(article)}>
-                          <Trash2 className="w-4 h-4 text-red-500" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="w-full border rounded-md overflow-hidden">
+  <table className="w-full">
+    <thead>
+      <tr className="border-b border-gray-200">
+        <th className="text-left py-3 px-4 font-medium text-foreground/60">Title</th>
+        <th className="text-left py-3 px-4 font-medium text-foreground/60">Views</th>
+        <th className="text-left py-3 px-4 font-medium text-foreground/60">Last Updated</th>
+        <th className="text-left py-3 px-4 font-medium text-foreground/60">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {knowledgeBase.map((article) => (
+        <tr key={article.id} className="border-b border-gray-100 hover:bg-gray-50">
+          <td className="py-4 px-4">
+            <div className="flex items-center gap-2">
+              <CircleQuestionMark className="text-[#3B82F6] w-5 h-5 " />
+              <span className="">{article.title}</span>
+            </div>
+          </td>
+          <td className="py-4 px-4">{article.views.toLocaleString()}</td>
+          <td className="py-4 px-4">{article.lastUpdated}</td>
+          <td className="py-4 px-4">
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm">
+                <DownloadIcon className="w-4 h-4" />
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(article)}>
+                <Trash2 className="w-4 h-4 text-red-500" />
+              </Button>
+            </div>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
           </div>
         </div>
 
