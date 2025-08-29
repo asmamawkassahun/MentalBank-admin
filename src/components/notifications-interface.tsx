@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Search, Filter, Plus, Copy, Trash2, Bell, ChevronLeft, ChevronRight, Calendar } from "lucide-react"
+import { DashboardHeader } from "./dashboard/dashboard-header"
 
 interface Notification {
   id: string
@@ -63,26 +64,25 @@ export function NotificationsInterface() {
   const getTypeColor = (type: string) => {
     switch (type) {
       case "Upgrade":
-        return "bg-blue-100 text-blue-800 hover:bg-blue-200"
+        return "bg-[#7C9CBF] text-white "
       case "Alert":
-        return "bg-orange-100 text-orange-800 hover:bg-orange-200"
-      case "Info":
-        return "bg-gray-100 text-foreground hover:bg-gray-200"
+        return "bg-[#F8B195] text-foreground "
+   
       default:
-        return "bg-gray-100 text-foreground hover:bg-gray-200"
+        return "bg-gray-100 text-foreground"
     }
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Sent":
-        return "bg-green-100 text-green-800 hover:bg-green-200"
+        return "bg-[#DCFCE7] text-green-800 border-[#BBF7D0] "
       case "Scheduled":
-        return "bg-blue-100 text-blue-800 hover:bg-blue-200"
+        return "bg-[#DBEAFE] text-blue-800 border-[#BFDBFE] "
       case "Draft":
-        return "bg-gray-100 text-foreground hover:bg-gray-200"
+        return "bg-[#F4F4F5] text-foreground border-[#E4E4E7] "
       default:
-        return "bg-gray-100 text-foreground hover:bg-gray-200"
+        return "bg-gray-100 text-foreground "
     }
   }
 
@@ -173,9 +173,10 @@ export function NotificationsInterface() {
   const isPaginationActive = safeData.total > 6
 
   return (
-    <div className="flex-1 space-y-6 p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div>
+
+      <DashboardHeader title="Notifications" />
+      {/* <div className="flex items-center justify-between border-b px-6 py-5">
         <div>
           <h1 className="text-xl font-semibold ">Notifications</h1>
         </div>
@@ -194,257 +195,246 @@ export function NotificationsInterface() {
             <span className="text-sm font-medium text-foreground/60">A</span>
           </div>
         </div>
-      </div>
+      </div> */}
+      <div className="flex-1 space-y-6 p-6">
 
-      {/* Notification Management Section */}
-      <div className="text-center py-8">
-        <h2 className="text-[1.5rem] font-semibold  mb-2">Notification Management</h2>
-        <p className="text-foreground/60">Manage your notification templates and delivery settings</p>
-      </div>
+        {/* Notification Management Section */}
+        <div className="text-center">
+          <h2 className="text-[1.5rem] font-semibold  mb-2">Notification Management</h2>
+          <p className="text-foreground/60">Manage your notification templates and delivery settings</p>
+        </div>
 
-      {/* Notifications Table */}
-      <Card className="shadow-none">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-lg font-semibold">Notifications</CardTitle>
-              <p className="text-sm text-foreground/60 mt-1">Manage all your notification templates</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button variant="outline" size="sm">
-                <Filter className="h-4 w-4 mr-2" />
-                Filter
-              </Button>
-              <Button size="sm" onClick={() => setIsModalOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                New Notification
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {/* Search */}
-            {/* <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search notifications..."
-                value={searchTerm}
-                onChange={(e) => handleSearch(e.target.value)}
-                className="pl-10"
-              />
-            </div> */}
-
-            {/* Table */}
-            <div className="border rounded-lg">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Audience</TableHead>
-                    <TableHead>Scheduled Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {safeData.notifications.map((notification) => (
-                    <TableRow key={notification.id}>
-                      <TableCell className="font-medium">{notification.title}</TableCell>
-                      <TableCell>
-                        <Badge className={getTypeColor(notification.type)}>{notification.type}</Badge>
-                      </TableCell>
-                      <TableCell className="text-foreground/100">{notification.audience}</TableCell>
-                      <TableCell className="text-foreground/100">{notification.scheduledDate}</TableCell>
-                      <TableCell>
-                        <Badge className={getStatusColor(notification.status)}>{notification.status}</Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button variant="ghost" size="sm">
-                            <Copy className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-
-            {/* Pagination */}
+        {/* Notifications Table */}
+        <Card className="shadow-none">
+          <CardHeader>
             <div className="flex items-center justify-between">
-              <p className="text-sm text-foreground/60">
-                Showing {Math.min((currentPage - 1) * 6 + 1, safeData.total)} to{" "}
-                {Math.min(currentPage * 6, safeData.total)} of {safeData.total} notifications
-              </p>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handlePreviousPage}
-                  disabled={!isPaginationActive || currentPage <= 1}
-                >
-                  <ChevronLeft className="h-4 w-4 mr-1" />
-                  Previous
+              <div>
+                <CardTitle className="text-lg font-semibold">Notifications</CardTitle>
+                <p className="text-sm text-foreground/60 mt-1">Manage all your notification templates</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button variant="outline" size="sm">
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filter
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleNextPage}
-                  disabled={!isPaginationActive || currentPage >= safeData.totalPages}
-                >
-                  Next
-                  <ChevronRight className="h-4 w-4 ml-1" />
+                <Button size="sm" onClick={() => setIsModalOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Notification
                 </Button>
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+                {/* Table */}
+              <div className="border rounded-lg">
+                <Table>
+                  <TableHeader>
+                    <TableRow >
+                      <TableHead className="text-foreground/60 p-4 ">Title</TableHead>
+                      <TableHead className="text-foreground/60 p-4">Type</TableHead>
+                      <TableHead className="text-foreground/60 p-4">Audience</TableHead>
+                      <TableHead className="text-foreground/60 p-4">Scheduled Date</TableHead>
+                      <TableHead className="text-foreground/60 p-4">Status</TableHead>
+                      <TableHead className="text-right text-foreground/60 p-4">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {safeData.notifications.map((notification) => (
+                      <TableRow key={notification.id} >
+                        <TableCell className="font-medium py-9 px-4">{notification.title}</TableCell>
+                        <TableCell>
+                          <Badge className={getTypeColor(notification.type)}>{notification.type}</Badge>
+                        </TableCell>
+                        <TableCell className="text-foreground/100">{notification.audience}</TableCell>
+                        <TableCell className="text-foreground/100">{notification.scheduledDate}</TableCell>
+                        <TableCell>
+                          <Badge className={getStatusColor(notification.status)}>{notification.status}</Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button variant="ghost" size="sm">
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
 
-      {/* New Notification Modal */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-semibold">New Notification</DialogTitle>
-            <p className="text-foreground/60 text-sm">Create a notification to send to your Mental Bank users</p>
-          </DialogHeader>
-
-          <div className="space-y-6 py-4">
-            {/* Notification Title */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground/80">Notification Title</label>
-              <Input
-                placeholder="Enter notification title"
-                value={notificationForm.title}
-                onChange={(e) => handleFormChange("title", e.target.value)}
-              />
-            </div>
-
-            {/* Message Body */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground/80">Message Body</label>
-              <Textarea
-                placeholder="Type your message here..."
-                rows={4}
-                value={notificationForm.message}
-                onChange={(e) => handleFormChange("message", e.target.value)}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-6 ">
-              {/* Notification Type */}
-              <div className="space-y-3">
-                <label className="text-sm font-medium text-foreground/80">Notification Type</label>
-                <div className="flex gap-2 flex-wrap">
+              {/* Pagination */}
+              <div className="flex items-center justify-between pt-6">
+                <p className="text-sm text-foreground/60">
+                  Showing {Math.min((currentPage - 1) * 6 + 1, safeData.total)} to{" "}
+                  {Math.min(currentPage * 6, safeData.total)} of {safeData.total} notifications
+                </p>
+                <div className="flex items-center gap-2">
                   <Button
-                    type="button"
+                    variant="outline"
                     size="sm"
-                    onClick={() => handleFormChange("type", "Reminder")}
-                    className={`flex flex-col items-center justify-center gap-2 p-8 border
-    ${notificationForm.type === "Reminder"
-                        ? "bg-[#EBF5FF] text-foreground border-[#7C9CBF] hover:bg-[#EBF5FF]"
-                        : "bg-background text-foreground hover:bg-black/5"
-                      }`}
+                    onClick={handlePreviousPage}
+                    disabled={!isPaginationActive || currentPage <= 1}
                   >
-                    🔔
-                    <p>Reminder</p>
+                    Previous
                   </Button>
-
-
                   <Button
-                    type="button"
+                    variant="outline"
                     size="sm"
-                    onClick={() => handleFormChange("type", "Upgrade")}
-                    className={`flex flex-col items-center justify-center gap-2 p-8 border
-    ${notificationForm.type === "Upgrade"
-                        ? "bg-[#EBF5FF] text-foreground border-[#7C9CBF] hover:bg-[#EBF5FF]"
-                        : "bg-background text-foreground hover:bg-black/5"
-                      }`}
+                    onClick={handleNextPage}
+                    disabled={!isPaginationActive || currentPage >= safeData.totalPages}
                   >
-                    ✨
-                    <p>Upgrade</p>
+                    Next
                   </Button>
                 </div>
-
               </div>
+            </div>
+          </CardContent>
+        </Card>
 
-              {/* Schedule Time */}
+        {/* New Notification Modal */}
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-semibold">New Notification</DialogTitle>
+              <p className="text-foreground/60 text-sm">Create a notification to send to your Mental Bank users</p>
+            </DialogHeader>
+
+            <div className="space-y-6 py-4">
+              {/* Notification Title */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground/80">Schedule Time</label>
-                <div className="relative">
-                  <Input
-                    type="date"
-                    value={notificationForm.scheduleDate}
-                    onChange={(e) => handleFormChange("scheduleDate", e.target.value)}
-                    className="pl-10"
-                  />
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-foreground/60" />
+                <label className="text-sm font-medium text-foreground/80">Notification Title</label>
+                <Input
+                  placeholder="Enter notification title"
+                  value={notificationForm.title}
+                  onChange={(e) => handleFormChange("title", e.target.value)}
+                />
+              </div>
+
+              {/* Message Body */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground/80">Message Body</label>
+                <Textarea
+                  placeholder="Type your message here..."
+                  rows={4}
+                  value={notificationForm.message}
+                  onChange={(e) => handleFormChange("message", e.target.value)}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-6 ">
+                {/* Notification Type */}
+                <div className="space-y-3">
+                  <label className="text-sm font-medium text-foreground/80">Notification Type</label>
+                  <div className="flex gap-2 flex-wrap">
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => handleFormChange("type", "Reminder")}
+                      className={`flex flex-col items-center justify-center gap-2 p-8 border
+                      ${notificationForm.type === "Reminder"
+                          ? "bg-[#EBF5FF] text-foreground border-[#7C9CBF] hover:bg-[#EBF5FF]"
+                          : "bg-background text-foreground hover:bg-black/5"
+                        }`}
+                    >
+                      🔔
+                      <p>Reminder</p>
+                    </Button>
+
+
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => handleFormChange("type", "Upgrade")}
+                      className={`flex flex-col items-center justify-center gap-2 p-8 border
+                      ${notificationForm.type === "Upgrade"
+                          ? "bg-[#EBF5FF] text-foreground border-[#7C9CBF] hover:bg-[#EBF5FF]"
+                          : "bg-background text-foreground hover:bg-black/5"
+                        }`}
+                    >
+                      ✨
+                      <p>Upgrade</p>
+                    </Button>
+                  </div>
+
+                </div>
+
+                {/* Schedule Time */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground/80">Schedule Time</label>
+                  <div className="relative">
+                    <Input
+                      type="date"
+                      value={notificationForm.scheduleDate}
+                      onChange={(e) => handleFormChange("scheduleDate", e.target.value)}
+                      className="pl-10"
+                    />
+                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-foreground/60" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Audience Targeting */}
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-foreground/80">Audience Targeting</label>
+                <div className="flex gap-6">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="allUsers"
+                      checked={notificationForm.audience.allUsers}
+                      onCheckedChange={(checked) => handleFormChange("audience.allUsers", checked)}
+                    />
+                    <label htmlFor="allUsers" className="text-sm text-foreground/80">
+                      All Users
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="premiumUsers"
+                      checked={notificationForm.audience.premiumUsers}
+                      onCheckedChange={(checked) => handleFormChange("audience.premiumUsers", checked)}
+                    />
+                    <label htmlFor="premiumUsers" className="text-sm text-foreground/60">
+                      Premium User
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="activeUsers"
+                      checked={notificationForm.audience.activeUsers}
+                      onCheckedChange={(checked) => handleFormChange("audience.activeUsers", checked)}
+                    />
+                    <label htmlFor="activeUsers" className="text-sm text-foreground/60">
+                      Active Users
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Audience Targeting */}
-            <div className="space-y-3">
-              <label className="text-sm font-medium text-foreground/80">Audience Targeting</label>
-              <div className="flex gap-6">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="allUsers"
-                    checked={notificationForm.audience.allUsers}
-                    onCheckedChange={(checked) => handleFormChange("audience.allUsers", checked)}
-                  />
-                  <label htmlFor="allUsers" className="text-sm text-foreground/80">
-                    All Users
-                  </label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="premiumUsers"
-                    checked={notificationForm.audience.premiumUsers}
-                    onCheckedChange={(checked) => handleFormChange("audience.premiumUsers", checked)}
-                  />
-                  <label htmlFor="premiumUsers" className="text-sm text-foreground/60">
-                    Premium User
-                  </label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="activeUsers"
-                    checked={notificationForm.audience.activeUsers}
-                    onCheckedChange={(checked) => handleFormChange("audience.activeUsers", checked)}
-                  />
-                  <label htmlFor="activeUsers" className="text-sm text-foreground/60">
-                    Active Users
-                  </label>
-                </div>
-              </div>
+            {/* Modal Actions */}
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={handleSaveAsDraft}>
+                Save as Draft
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleSendNow}
+                disabled={isSendDisabled}
+                className={isSendDisabled ? "bg-[#E5E7EB]  cursor-not-allowed" : ""}
+              >
+                Send Now
+              </Button>
+
+              <Button onClick={handleSchedule}>Schedule</Button>
             </div>
-          </div>
-
-          {/* Modal Actions */}
-          <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button variant="outline" onClick={handleSaveAsDraft}>
-              Save as Draft
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleSendNow}
-              disabled={isSendDisabled}
-              className={isSendDisabled ? "bg-[#E5E7EB]  cursor-not-allowed" : ""}
-            >
-              Send Now
-            </Button>
-
-            <Button onClick={handleSchedule}>Schedule</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   )
 }
