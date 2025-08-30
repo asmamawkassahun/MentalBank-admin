@@ -39,7 +39,7 @@ const navigationItems = [
 ]
 
 const supportItems = [
-  { icon: MessageSquare, label: "Feedback & Support", key: "feedback" as const },
+  { icon: FileText, label: "Feedback & Support", key: "feedback" as const },
   { icon: Settings, label: "Settings", key: "settings" as const },
 ]
 
@@ -71,7 +71,7 @@ export function AppSidebar({ currentPage, onPageChange }: AppSidebarProps) {
   return (
     <Sidebar variant="inset" collapsible="icon">
       <SidebarHeader>
-        <div className="flex items-center gap-3 px-1 ">
+        <div className="flex items-center gap-3  ">
           <div className="w-8 h-8  rounded-lg flex items-center justify-center">
             <svg width="48" height="41" viewBox="0 0 48 41" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
@@ -86,7 +86,7 @@ export function AppSidebar({ currentPage, onPageChange }: AppSidebarProps) {
 
           </div>
           <div className="leading-tight">
-            <h1 className="font-extrabold text-[1.25rem]  group-data-[collapsible=icon]:hidden">
+            <h1 className="font-extrabold text-[1.25rem] font-poppins group-data-[collapsible=icon]:hidden">
               Mental Bank
             </h1>
             <p className=" font-medium text-[0.625rem] group-data-[collapsible=icon]:hidden ">Prosperous you! </p>
@@ -102,7 +102,7 @@ export function AppSidebar({ currentPage, onPageChange }: AppSidebarProps) {
               {navigationItems.map((item) => (
                 <SidebarMenuItem key={item.label}>
                   <SidebarMenuButton
-                  className="cursor-pointer"
+                    className="cursor-pointer"
                     onClick={() => {
                       if (item.key === "dashboard") onPageChange("dashboard")
                       if (item.key === "reports") onPageChange("reports")
@@ -133,7 +133,7 @@ export function AppSidebar({ currentPage, onPageChange }: AppSidebarProps) {
               {supportItems.map((item) => (
                 <SidebarMenuItem key={item.label}>
                   <SidebarMenuButton
-                  className="cursor-pointer"
+                    className="cursor-pointer"
                     onClick={() => {
                       if (item.key === "feedback") onPageChange("feedback")
                       if (item.key === "settings") onPageChange("settings")
@@ -162,10 +162,10 @@ export function AppSidebar({ currentPage, onPageChange }: AppSidebarProps) {
               {isLoading
                 ? "..."
                 : adminData.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")
-                    .toUpperCase()}
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden">

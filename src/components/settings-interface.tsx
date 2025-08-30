@@ -236,7 +236,7 @@ export function SettingsInterface() {
 
       <div className="space-y-6">
         {/* Profile Information */}
-        <Card className="shadow-none">
+        <Card className="shadow-none rounded-[0.375rem]">
           <CardHeader>
             <CardTitle>Profile Information</CardTitle>
             <CardDescription>Update your personal information and profile picture</CardDescription>
@@ -251,7 +251,7 @@ export function SettingsInterface() {
                 <h3 className="font-medium">{profile?.firstName} {profile?.lastName}</h3>
                 <p className="text-sm text-foreground/60">{profile?.email}</p>
                 <div className="flex space-x-2">
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" className="shadow-none ">
                     Change Photo
                   </Button>
                   <Button variant="default" size="sm">
@@ -264,7 +264,7 @@ export function SettingsInterface() {
         </Card>
 
         {/* Personal Information */}
-        <Card className="shadow-none">
+        <Card className="shadow-none rounded-[0.375rem]">
           <CardHeader>
             <CardTitle>Personal Information</CardTitle>
             <CardDescription>Manage your personal details and contact information</CardDescription>
@@ -277,7 +277,7 @@ export function SettingsInterface() {
                   id="firstName"
                   value={formData.firstName}
                   onChange={(e) => handleInputChange("firstName", e.target.value)}
-                  className="max-w-md"
+                  className="max-w-md "
                 />
               </div>
               <div className="space-y-2">
@@ -325,8 +325,8 @@ export function SettingsInterface() {
         </Card>
 
         {/* Security Settings */}
-        <Card className="space-y-6 shadow-none">
-          {/* Change Password */}
+        <Card className="space-y-6 shadow-none rounded-[0.375rem] ">
+          {/* Security Settings */}
           <div className="p-0 border-0 shadow-none">
             <CardHeader>
               <CardTitle>Change Password</CardTitle>
@@ -391,29 +391,29 @@ export function SettingsInterface() {
               </div>
             </CardContent>
           </div>
-          <Separator className="m-none" />
+          {/* <Separator className="m-none" /> */}
 
           {/* Two-Factor Authentication */}
-          <div className="p-0 border-0 shadow-none">
-            <CardHeader>
-              <CardTitle>Two-Factor Authentication</CardTitle>
-              <CardDescription>Add an extra layer of security to your account</CardDescription>
+          {/* <div className="p-0 mx-6 pt-4 border-0 shadow-none border-t">
+            <CardHeader className=" pl-0">
+              <CardTitle className="leading-6">Two-Factor Authentication</CardTitle>
+              <CardDescription className="leading-5">Add an extra layer of security to your account</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className=" mt-4 shadow-none pl-0">
               <Button variant="outline">Enable Two-Factor Authentication</Button>
             </CardContent>
-          </div>
+          </div> */}
 
-          <Separator />
+          {/* <Separator /> */}
           {/* Recent Login Activity */}
-          <div className="p-0 border-0 shadow-none">
-            <CardHeader>
+          <div className="p-0 mx-6 pt-4 border-0 shadow-none border-t">
+            <CardHeader className=" pl-0">
               <CardTitle>Recent Login Activity</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pl-0">
               <div className="space-y-3">
                 {loginActivity.map((activity, index) => (
-                  <div key={index} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50">
+                  <div key={index} className="flex items-center space-x-3 py-2 rounded-lg hover:bg-gray-50">
                     <div className="p-2 bg-gray-100 rounded-lg">{getDeviceIcon(activity.icon)}</div>
                     <div className="flex-1">
                       <p className="font-medium text-sm">{activity.device}</p>
@@ -430,7 +430,7 @@ export function SettingsInterface() {
         </Card>
 
         {/* Action Buttons */}
-        <div className="flex justify-end space-x-3 pt-4">
+        <div className="flex justify-end space-x-2 ">
           <Button variant="outline" onClick={handleCancel}>
             Cancel
           </Button>

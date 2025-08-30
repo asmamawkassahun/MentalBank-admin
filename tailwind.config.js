@@ -10,6 +10,7 @@ module.exports = {
        fontFamily: {
         Geist: ['"Geist"', 'sans-serif'], // key = Geist
       },
+      poppins: ["Poppins", "sans-serif"],
     },
   },
   plugins: [],

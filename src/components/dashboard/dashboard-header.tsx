@@ -2,11 +2,11 @@ import { Bell } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 
-export function DashboardHeader() {
+export function DashboardHeader({title}: {title?: string}) {
   return (
     <header className="bg-background border-b border-gray-200 px-6 py-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Admin Dashboard</h1>
+        <h1 className="text-2xl font-semibold">{title}</h1>
 
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" className="relative">
